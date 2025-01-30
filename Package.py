@@ -32,7 +32,7 @@ class Package:
             self.status = "Delivered"
         # Check if package is en route.
         elif self.departure_time is not None and self.departure_time <= convert_timedelta:
-            self.status = "En route"
+            self.status = "En Route"
         # Default to at-hub status.
         else:
             self.status = "At Hub"

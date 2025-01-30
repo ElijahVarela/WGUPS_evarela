@@ -20,7 +20,6 @@ class HashTable:
         # If the key is not found, append the new key-value pair to the bucket.
         key_value_pair = [key, value]
         bucket.append(key_value_pair)
-        return True
 
     # Searches for a value in the hash map using its key.
     def lookup(self, key):

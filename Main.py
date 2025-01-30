@@ -11,7 +11,6 @@ from datetime import timedelta
 # Defines the truck speed in miles per minute for time calculations.
 truck_speed = 18/60
 # Function to load package data from a CSV file into a hash table.
-# Time Complexity: O(n)
 def load_package_data(package_file, hash_table):
     # Opens the CSV file containing package information.
     with open(package_file) as csv_file:
@@ -77,62 +76,85 @@ def distance_between(address1, address2, address_data, distance_data):
         else:
             return distance_data[j][i]
 
+####Incorrect previous function for update package 9
+# # Function to update the information for package 9.
+# def update_package_9(convert_timedelta):
+#     # Checks if the time is after 10:20 AM.
+#     if convert_timedelta >= timedelta(hours = 10, minutes = 20, seconds = 0):
+#         # Updates package 9 with the corrected address and details.
+#         updated_package_9 = Package(
+#             package_id=9,
+#             address="410 S State St",  # Corrected address
+#             city="Salt Lake City",
+#             state="UT",
+#             zip_code="84111",
+#             deadline="EOD",
+#             weight="2",
+#             notes="Address was updated at 10:20am",
+#         )
+#         # Inserts the updated package into the hash table.
+#         new_table.insert(9, updated_package_9)
+#         # Initiates package delivery for truck three.
+#         truck_three.deliver_packages(new_table, loaded_address_data, loaded_distance_data)
+#     else:
+#         # Keeps the initial address and details for package 9.
+#         updated_package_9 = Package(
+#             package_id=9,
+#             address="300 State St",  # Corrected address
+#             city="Salt Lake City",
+#             state="UT",
+#             zip_code="84103",
+#             deadline="EOD",
+#             weight="2",
+#             notes="Wrong address listed",
+#         )
+#         # Inserts the package into the hash table.
+#         new_table.insert(9, updated_package_9)
+#         # Initiates package delivery for truck three.
+#         truck_three.deliver_packages(new_table, loaded_address_data, loaded_distance_data)
+
 # Function to update the information for package 9.
-def update_package_9(convert_timedelta):
-    # Checks if the time is after 10:20 AM.
-    if convert_timedelta >= timedelta(hours = 10, minutes = 20, seconds = 0):
-        # Updates package 9 with the corrected address and details.
-        updated_package_9 = Package(
-            package_id=9,
-            address="410 S State St",  # Corrected address
-            city="Salt Lake City",
-            state="UT",
-            zip_code="84111",
-            deadline="EOD",
-            weight="2",
-            notes="Address was updated at 10:20am",
-        )
-        # Inserts the updated package into the hash table.
-        new_table.insert(9, updated_package_9)
-        # Initiates package delivery for truck three.
+def update_package_9(input_time):
+    # Retrieve package 9 and its notes from the loaded table
+    package_nine = loaded_new_table.lookup(9)
+    package_nine_notes = loaded_new_table.lookup(9)
+    # Check if the input time is 10:20:00 or later
+    if input_time >= timedelta(hours = 10, minutes = 20, seconds = 0):
+        # Update the address and notes for package 9
+        package_nine.address = "410 S State St"
+        package_nine_notes.notes = "Updated address at 10:20:00"
+
         truck_three.deliver_packages(new_table, loaded_address_data, loaded_distance_data)
     else:
-        # Keeps the initial address and details for package 9.
-        updated_package_9 = Package(
-            package_id=9,
-            address="300 State St",  # Corrected address
-            city="Salt Lake City",
-            state="UT",
-            zip_code="84103",
-            deadline="EOD",
-            weight="2",
-            notes="Wrong address listed",
-        )
-        # Inserts the package into the hash table.
-        new_table.insert(9, updated_package_9)
-        # Initiates package delivery for truck three.
+        package_nine.address = "300 State St"
+        package_nine_notes.notes = "Wrong address listed"
         truck_three.deliver_packages(new_table, loaded_address_data, loaded_distance_data)
 
 # Function to print detailed information about a package.
-def print_information(package):
+def print_information(package, truck_id):
+    # Condition to change delivery field depending on package status
+    if package.status != "Delivered":
+        deli_eta = "ETA:"
+    else:
+        deli_eta = "Delivered At:"
     # Display all relevant details of a package in a formatted output.
     print(f"[Package ID: {package.package_id}] "
-        f"[Status: {package.status}] "
-        f"[Delivery Time: {package.delivery_time}] "
-        f"[Deadline: {package.deadline}] "
-        f"[Address: {package.address}, "
-        f"City: {package.city}, "
-        f"State: {package.state}, "
-        f"Zipcode: {package.zip_code}] "
-        f"[Weight: {package.weight}] "
-        f"[Notes: {package.notes}]")
-    print("-" * 250) # Separator for better readability.
-
+          f"[Truck ID: {truck_id}] "  # Include the truck ID
+          f"[Status: {package.status}] "
+          f"[{deli_eta} {package.delivery_time}] "
+          f"[Deadline: {package.deadline}] "
+          f"[Address: {package.address}, "
+          f"City: {package.city}, "
+          f"State: {package.state}, "
+          f"Zipcode: {package.zip_code}] "
+          f"[Weight: {package.weight}] "
+          f"[Notes: {package.notes}]")
+    print("-" * 250)  # Separator for better readability.
 
 # Function to print all delivered packages and the total mileage of all trucks.
 def print_all_delivered_packages(print_all_new_table, print_truck_one, print_truck_two, print_truck_three):
-    # Update package #9's status based on truck three's departure ti1
-    # me.
+    # Update package #9's status based on truck three's departure time.
+    # update_package_9(print_truck_three.depart_time)
     update_package_9(print_truck_three.depart_time)
     # Calculate and print the total mileage of all trucks.
     total_mileage = print_truck_one.mileage + print_truck_two.mileage + print_truck_three.mileage
@@ -145,18 +167,24 @@ def print_all_delivered_packages(print_all_new_table, print_truck_one, print_tru
         # Check if package is delivered.
         if package and package.status == "Delivered":
             delivered_found = True
-            print_information(package)
+            # Determine which truck delivered the package
+            if package_ID in print_truck_one.initial_packages:
+                print_information(package, print_truck_one.truck_id)  # Pass truck ID
+            elif package_ID in print_truck_two.initial_packages:
+                print_information(package, print_truck_two.truck_id)  # Pass truck ID
+            elif package_ID in print_truck_three.initial_packages:
+                print_information(package, print_truck_three.truck_id)  # Pass truck ID
     # If no packages are delivered, notify the user.
     if not delivered_found:
         print("No packages have been delivered yet.")
 
 # Function to print the status of a specific package at a given time.
-def print_specific_package_at_time(print_specific_new_table):
+def print_specific_package_at_time(print_specific_new_table, print_truck_one, print_truck_two, print_truck_three):
     try:
         # Prompt user to input a specific time to check the package status.
         user_time = input("Enter a time to check the package status (format HH:MM:SS): ").strip()
         h, m, s = user_time.split(":")
-        convert_timedelta = timedelta(hours = int(h), minutes = int(m), seconds = int(s))
+        convert_timedelta = timedelta(hours=int(h), minutes=int(m), seconds=int(s))
         # Prompt user to input the package ID.
         package_id = int(input("Enter the numeric package ID: ").strip())
         update_package_9(convert_timedelta)
@@ -164,7 +192,13 @@ def print_specific_package_at_time(print_specific_new_table):
         if package:
             # Update and print the package's status based on the given time.
             package.update_package_status(convert_timedelta)
-            print_information(package)
+            # Determine which truck delivered the package
+            if package_id in print_truck_one.initial_packages:
+                print_information(package, print_truck_one.truck_id)
+            elif package_id in print_truck_two.initial_packages:
+                print_information(package, print_truck_two.truck_id)
+            elif package_id in print_truck_three.initial_packages:
+                print_information(package, print_truck_three.truck_id)
         else:
             # Notify user if package ID is not found.
             print("Package ID not found.")
@@ -172,44 +206,51 @@ def print_specific_package_at_time(print_specific_new_table):
         # Handle invalid user input
         print("Invalid input. Please try again.")
 
-
 # Function to print the status of all packages at a given time.
-def print_all_packages_at_time(print_all_new_table):
+def print_all_packages_at_time(print_all_new_table, print_truck_one, print_truck_two, print_truck_three):
     try:
         # Prompt user to input a specific time to check all package statuses.
         user_time = input("Enter a time to check all package statuses (format HH:MM:SS): ").strip()
-        h, m, s = user_time.split(":") # Parse hours, minutes, and seconds from input.
-        convert_timedelta = timedelta(hours = int(h), minutes = int(m), seconds = int(s))
+        h, m, s = user_time.split(":")  # Parse hours, minutes, and seconds from input.
+        convert_timedelta = timedelta(hours=int(h), minutes=int(m), seconds=int(s))
         update_package_9(convert_timedelta)
+
         # Print information about all packages at the given time.
         print(f"\nAll Packages at the Given Time: {convert_timedelta}")
         for packageID in range(1, 41):
             package = print_all_new_table.lookup(packageID)
             if package:
                 package.update_package_status(convert_timedelta)
-                print_information(package)
+                # Determine which truck delivered the package.
+                if packageID in print_truck_one.initial_packages:
+                    print_information(package, print_truck_one.truck_id)  # Pass truck ID
+                elif packageID in print_truck_two.initial_packages:
+                    print_information(package, print_truck_two.truck_id)  # Pass truck ID
+                elif packageID in print_truck_three.initial_packages:
+                    print_information(package, print_truck_three.truck_id)  # Pass truck ID
     except ValueError:
         # Handle invalid user input.
         print("Invalid input. Please try again.")
-
-
-# Create truck objects with predefined packages and departure times.
-truck_one = Truck(16, 18, None, [13, 14, 15, 16, 19, 20, 1, 29, 30, 31, 34, 37, 40],
-                0.0, "4001 South 700 East", timedelta(hours = 8, minutes = 0, seconds = 0))
-truck_two = Truck(16, 18, None, [3, 6, 18, 25, 28, 32, 36, 38, 27, 35, 39],
-                0.0, "4001 South 700 East", timedelta(hours = 9, minutes = 5, seconds = 0))
-truck_three = Truck(16, 18, None, [9, 2, 4, 5, 7, 8, 10, 11, 12, 17, 21, 22, 23, 24, 26, 33],
-                0.0, "4001 South 700 East", timedelta(hours = 10, minutes = 20, seconds = 0))
-
 # Load data into the hash table and address/distance lists.
 new_table = HashTable()
 loaded_new_table = load_package_data("packageCSV.csv", new_table)
 loaded_distance_data = load_distance_data("distanceCSV.csv")
 loaded_address_data = load_address_data("addressCSV.csv")
 
+# Create truck objects with predefined packages and departure times.
+truck_one = Truck(1, 16, 18, None, [13, 14, 15, 16, 19, 20, 1, 29, 30, 31, 34, 37, 40],
+                0.0, "4001 South 700 East", timedelta(hours = 8, minutes = 0, seconds = 0))
+truck_two = Truck(2, 16, 18, None, [3, 6, 18, 25, 28, 32, 36, 38, 27, 35, 39],
+                0.0, "4001 South 700 East", timedelta(hours = 9, minutes = 5, seconds = 0))
+# package9 = loaded_new_table.lookup(9)
+# package9.address = "410 S State St"
+truck_three = Truck(3, 16, 18, None, [9, 2, 4, 5, 7, 8, 10, 11, 12, 17, 21, 22, 23, 24, 26, 33],
+                0.0, "4001 South 700 East", timedelta(hours = 10, minutes = 20, seconds = 0))
+
 # Deliver packages for each truck using a nearest neighbor algorithm.
 truck_one.deliver_packages(loaded_new_table, loaded_address_data, loaded_distance_data)
 truck_two.deliver_packages(loaded_new_table, loaded_address_data, loaded_distance_data)
+# truck_three.deliver_packages(loaded_new_table, loaded_address_data, loaded_distance_data)
 
 # Main class for the program's user interface.
 class Main:
@@ -229,13 +270,13 @@ class Main:
                 print_all_delivered_packages(ui_new_table, ui_truck_one, ui_truck_two, ui_truck_three)
             elif choice == "2":
                 # Option 2: Print information of a specific package at a given time.
-                print_specific_package_at_time(ui_new_table)
+                print_specific_package_at_time(ui_new_table,ui_truck_one, ui_truck_two, ui_truck_three)
             elif choice == "3":
                 # Option 3: Print information of all packages at a given time.
-                print_all_packages_at_time(ui_new_table)
+                print_all_packages_at_time(ui_new_table, ui_truck_one, ui_truck_two, ui_truck_three)
             elif choice == "4":
                 # Option 4: Exit the program.
-                print("Exiting the program. Goodbye!")
+                print("Exiting Western Governors University Parcel Service. Goodbye!")
                 break
             else:
                 # Handle invalid input.

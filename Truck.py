@@ -2,11 +2,13 @@ from datetime import timedelta
 
 # Class representing a delivery truck with routing and package management capabilities
 class Truck:
-    def __init__(self, capacity, truck_speed, load, packages, mileage, address, depart_time):
+    def __init__(self, truck_id, capacity, truck_speed, load, packages, mileage, address, depart_time):
+        self.truck_id = truck_id
         self.capacity = capacity
         self.truck_speed = truck_speed
         self.load = load
         self.packages = packages
+        self.initial_packages = packages.copy()
         self.mileage = mileage
         self.address = address
         self.depart_time = depart_time
@@ -16,6 +18,7 @@ class Truck:
     # Returns formatted string with key truck operational details.
     def __str__(self):
         return (
+            f"Truck ID: {self.truck_id}, "
             f"Capacity: {self.capacity}, "
             f"Truck Speed: {self.truck_speed}, "
             f"Load: {self.load}, "
